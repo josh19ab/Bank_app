@@ -1,16 +1,19 @@
 import sqlite3
 
+# customer
 class Customer:
     def __init__(self, cust_name, password, balance=0):
         self.cust_name = cust_name
         self.password = password
         self.balance = balance
 
+
 class BankApplication:
     def __init__(self):
-        self.conn = sqlite3.connect('bank_database.db')
+        self.conn = sqlite3.connect('bank_database.db')  #connect with database
         self.create_table()
 
+# creating table in db to store customer details
     def create_table(self):
         with self.conn:
             cursor = self.conn.cursor()
@@ -21,14 +24,16 @@ class BankApplication:
                     balance REAL
                 )
             ''')
-
+            
+    # to add customer
     def insert_customer(self, customer):
         with self.conn:
             cursor = self.conn.cursor()
             cursor.execute('''
                 INSERT INTO customers VALUES (?, ?, ?)
             ''', (customer.cust_name, customer.password, customer.balance))
-
+            
+    # existing customer details
     def get_customer_by_credentials(self, cust_name, password):
         with self.conn:
             cursor = self.conn.cursor()
@@ -36,13 +41,15 @@ class BankApplication:
                 SELECT * FROM customers WHERE cust_name=? AND password=?
             ''', (cust_name, password))
             return cursor.fetchone()
-
+        
+    # user choice
     def display_menu(self):
         print("\nMenu:")
         print("1. Customer Login")
         print("2. New Customer Sign in")
         print("3. Exit")
 
+    # login details
     def customer_login(self):
         cust_name = input("Enter Customer Name: ")
         password = input("Enter Password: ")
@@ -56,6 +63,7 @@ class BankApplication:
         else:
             print("Not a valid customer...")
 
+# adding new customer
     def new_customer_sign_in(self):
         cust_name = input("Enter Customer Name: ")
         password = input("Enter Password: ")
@@ -67,6 +75,7 @@ class BankApplication:
         else:
             print("Customer already exists. Try a different username.")
 
+# options after login
     def account_menu(self, customer):
         while True:
             print("\nAccount Details:")
@@ -76,26 +85,26 @@ class BankApplication:
             print("d. Exit")
 
             option = input("Choose an option: ").lower()
-
-            if option == 'a':
+            # deposit
+            if option == 'a': 
                 amount = self.get_valid_amount("Enter amount to deposit: ")
                 customer.balance += amount
                 print(f"Current balance: {customer.balance}")
-
+            # withdrawal
             elif option == 'b':
                 amount = self.get_valid_amount("Enter amount to withdraw: ")
                 if amount > customer.balance:
-                    print("Insufficient balance. Try again.")
+                    print("!!!Insufficient balance.!!!")
                 else:
                     customer.balance -= amount
                     print(f"Withdrawal successful. Current balance: {customer.balance}")
-
+            # balance
             elif option == 'c':
                 print(f"Current balance: {customer.balance}")
 
             elif option == 'd':
                 break
-
+# exceptions and handling invalid inputs
     def get_valid_amount(self, prompt):
         while True:
             try:
@@ -110,7 +119,7 @@ class BankApplication:
     def __del__(self):
         self.conn.close()
 
-
+# main program
 if __name__ == "__main__":
     bank_app = BankApplication()
 
